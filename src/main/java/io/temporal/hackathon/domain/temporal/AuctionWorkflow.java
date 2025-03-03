@@ -17,7 +17,7 @@ public interface AuctionWorkflow {
     void bid(String userId, Long amount);
 
     @QueryMethod
-    AuctionStats getStats(String auctionId);
+    AuctionStats getStats();
 
     @SignalMethod
     void end();
