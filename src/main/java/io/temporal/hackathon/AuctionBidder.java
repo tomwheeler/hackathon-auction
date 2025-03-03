@@ -1,16 +1,25 @@
 package io.temporal.hackathon;
-import io.temporal.client.WorkflowClient;
-import io.temporal.serviceclient.WorkflowServiceStubs;
-import io.temporal.worker.Worker;
-import io.temporal.worker.WorkerFactory;
 
-import java.util.Optional;
+import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowClientOptions;
+import io.temporal.common.converter.CodecDataConverter;
+import io.temporal.common.converter.DefaultDataConverter;
+import io.temporal.hackathon.codec.SecurePayloadCodec;
+import io.temporal.serviceclient.WorkflowServiceStubs;
+
+import java.util.List;
 
 public class AuctionBidder {
 
     public static void main(String[] args) {
         WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
-        WorkflowClient client = WorkflowClient.newInstance(service);
+        WorkflowClient client = WorkflowClient.newInstance(service, WorkflowClientOptions.newBuilder()
+                .setDataConverter(
+                        new CodecDataConverter(
+                                DefaultDataConverter.newDefaultInstance(),
+                                List.of(new SecurePayloadCodec()), true))
+                .build());
+
 
         String name  = System.getenv("USER");
 

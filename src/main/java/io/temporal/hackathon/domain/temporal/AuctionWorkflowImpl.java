@@ -4,6 +4,7 @@ import io.temporal.hackathon.domain.auction.AuctionStats;
 import io.temporal.hackathon.domain.timer.Timer;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
+
 import java.time.Duration;
 
 public class AuctionWorkflowImpl implements AuctionWorkflow {
