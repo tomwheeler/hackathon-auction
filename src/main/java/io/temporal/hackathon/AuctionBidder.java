@@ -21,6 +21,7 @@ public class AuctionBidder {
         } catch (Exception e) {
             System.out.println("Please supply a bid price as the runtime argument");
         }
+		System.exit(0);
     }
 
 }
