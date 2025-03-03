@@ -2,11 +2,11 @@ package io.temporal.hackathon.domain.temporal;
 
 import io.temporal.hackathon.domain.auction.AuctionStats;
 import io.temporal.workflow.CancellationScope;
-import io.temporal.workflow.ContinueAsNewOptions;
+import io.temporal.workflow.Promise;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
+
 import java.time.Duration;
-import io.temporal.workflow.Promise;
 
 public class AuctionWorkflowImpl implements AuctionWorkflow {
 
@@ -23,7 +23,7 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
     public long startAuction(String auctionId) {
 		while (!hasEnded) {
 			createAndStartTimer();
-			if (System.currentTimeMillis() - lastBidTimestamp > 30_000) {
+			if (System.currentTimeMillis() - lastBidTimestamp > 10_000) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
 				hasEnded = true;
 			}
