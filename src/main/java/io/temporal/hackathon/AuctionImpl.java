@@ -4,24 +4,23 @@ import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 import java.time.Duration;
 import io.temporal.workflow.Promise;
-import io.temporal.workflow.Workflow;
 
 public class AuctionImpl implements Auction {
 
 	private final Logger logger = Workflow.getLogger(AuctionImpl.class);
 
-	private boolean isComplete;
+	private boolean hasEnded;
 	private int currentPrice;
 	private long lastBidTimestamp;
 
     @Override
     public int startAuction(String name) {
-		while (! isComplete) {
+		while (!hasEnded) {
 			Promise<Void> timer = Workflow.newTimer(Duration.ofSeconds(30));
-			Workflow.await(() -> timer.isCompleted() || this.isComplete);
+			Workflow.await(() -> timer.isCompleted() || this.hasEnded);
 			if (System.currentTimeMillis() - lastBidTimestamp > 30_000) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
-				isComplete = true;
+				hasEnded = true;
 			}
 		}
         return currentPrice;
@@ -44,6 +43,6 @@ public class AuctionImpl implements Auction {
 
 	@Override
 	public void end() {
-		isComplete = true;
+		hasEnded = true;
 	}
 }
