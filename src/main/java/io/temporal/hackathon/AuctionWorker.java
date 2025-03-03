@@ -1,5 +1,6 @@
 package io.temporal.hackathon;
 import io.temporal.client.WorkflowClient;
+import io.temporal.hackathon.domain.temporal.AuctionWorkflowImpl;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
@@ -13,7 +14,7 @@ public class AuctionWorker {
 
         Worker worker = factory.newWorker("auction"); // Task Queue name
 
-        worker.registerWorkflowImplementationTypes(AuctionImpl.class);
+        worker.registerWorkflowImplementationTypes(AuctionWorkflowImpl.class);
         factory.start();
         System.out.println("Worker started");
     }
