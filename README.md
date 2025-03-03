@@ -14,7 +14,7 @@ mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.Starter"
 ```
 
 
-## Send a bid (Signal)
+## Send a bid (via a Signal)
 
 ```bash
 mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.AuctionBidder" -Dexec.args="{bid_price}"
