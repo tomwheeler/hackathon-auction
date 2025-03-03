@@ -54,7 +54,6 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
 		logger.info("Bid accepted. Price is now {}", amount);
 		currentPrice = amount;
 		timer.updateWakeUpTime(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
-		timer.sleep(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
 		logger.info("Timer updated. Current sleep time is {}", timer.getSleepTime());
 	}
 
