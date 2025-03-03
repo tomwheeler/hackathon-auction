@@ -12,7 +12,15 @@ public class AuctionBidder {
         WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
         WorkflowClient client = WorkflowClient.newInstance(service);
 
-        client.newUntypedWorkflowStub("car").signal("bid", "user", 100);
-        System.out.println("Bid placed");
+        String name  = System.getenv("USER");
+
+        try {
+            Float bid = Float.parseFloat(args[0]);
+            client.newUntypedWorkflowStub("car").signal("bid", name, bid);
+            System.out.println("Bid placed " + bid);
+        } catch (Exception e) {
+            System.out.println("Please supply a bid price as the runtime argument");
+        }
     }
+
 }
