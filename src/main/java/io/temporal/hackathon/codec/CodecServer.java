@@ -6,6 +6,7 @@ import com.google.protobuf.util.JsonFormat;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.plugin.bundled.CorsPluginConfig;
 import io.temporal.api.common.v1.Payload;
 import io.temporal.api.common.v1.Payloads;
 import org.slf4j.Logger;
@@ -22,23 +23,21 @@ public class CodecServer {
 
 
     public CodecServer(int port) {
-        logger.info("Creating new BankController instance, with port={}", port);
+        logger.info("Creating new CodecServer instance, with port={}", port);
 
         this.port = port;
 
         server = Javalin.create(config -> {
             config.showJavalinBanner = false;
-            config.bundledPlugins.enableCors(cors -> {
-                cors.addRule(it -> {
-                    it.anyHost();
-                });
-            });
+            // Enable CORS for all origins
+            // In production it should be configured with only the proper Temporal UI DNS
+            config.bundledPlugins.enableCors(cors -> cors.addRule(CorsPluginConfig.CorsRule::anyHost));
         });
         server.post("/decode", new DecodeHandler());
     }
 
     public void start() {
-        logger.info("Starting BankController on port {}", port);
+        logger.info("Starting CodecServer on port {}", port);
         server.start("localhost", port);
     }
 
@@ -48,7 +47,7 @@ public class CodecServer {
         @Override
         public void handle(Context ctx) throws Exception {
 
-            logger.debug("BankController handling 'balance' request");
+            logger.debug("CodecServer handling 'decode' request");
 
             try {
 
