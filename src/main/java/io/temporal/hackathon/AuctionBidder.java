@@ -15,11 +15,13 @@ public class AuctionBidder {
         String name  = System.getenv("USER");
 
         try {
-            Float bid = Float.parseFloat(args[0]);
+            long bid = Long.parseLong(args[0]);
             client.newUntypedWorkflowStub("car").signal("bid", name, bid);
             System.out.println("Bid placed " + bid);
         } catch (Exception e) {
             System.out.println("Please supply a bid price as the runtime argument");
+
+            System.out.println(e);
         }
 		System.exit(0);
     }
