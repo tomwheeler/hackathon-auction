@@ -1,20 +1,17 @@
 package io.temporal.hackathon.domain.temporal;
 
 import io.temporal.hackathon.domain.auction.AuctionStats;
-import io.temporal.workflow.CancellationScope;
-import io.temporal.workflow.ContinueAsNewOptions;
+import io.temporal.hackathon.domain.timer.Timer;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 import java.time.Duration;
-import io.temporal.workflow.Promise;
 
 public class AuctionWorkflowImpl implements AuctionWorkflow {
 
 	private final Logger logger = Workflow.getLogger(AuctionWorkflowImpl.class);
 
-	private static final Duration THIRTY_SECONDS = Duration.ofSeconds(30);
-	private CancellationScope cancellationScope;
-	private Promise<Void> timerPromise;
+	private static final Duration SIXSTY_SECONDS = Duration.ofSeconds(60);
+	private final Timer timer = new Timer();
 	private boolean hasEnded;
 	private long currentPrice;
 	private long lastBidTimestamp;
@@ -22,8 +19,8 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
     @Override
     public long startAuction(String auctionId) {
 		while (!hasEnded) {
-			createAndStartTimer();
-			if (System.currentTimeMillis() - lastBidTimestamp > 30_000) {
+			timer.sleep(Workflow.currentTimeMillis() + SIXSTY_SECONDS.toMillis(), hasEnded);
+			if (Workflow.currentTimeMillis() - lastBidTimestamp > timer.getSleepTime()) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
 				hasEnded = true;
 			}
@@ -31,18 +28,10 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
         return currentPrice;
     }
 
-	private void createAndStartTimer() {
-		cancellationScope = Workflow.newCancellationScope(
-				() -> timerPromise = Workflow.newTimer(THIRTY_SECONDS)
-		);
-		cancellationScope.run();
-		Workflow.await(() -> timerPromise.isCompleted() || this.hasEnded);
-	}
-
 	@Override
 	public void bid(String userId, Long amount) {
 		logger.info("Bid received");
-		lastBidTimestamp = System.currentTimeMillis();
+		lastBidTimestamp = Workflow.currentTimeMillis() ;
 
 		// use validator instead?
 		if (amount <= currentPrice || hasEnded) {
@@ -52,8 +41,8 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
 
 		logger.info("Bid accepted. Price is now {}", amount);
 		currentPrice = amount;
-		cancellationScope.cancel();
-		createAndStartTimer();
+		timer.updateWakeUpTime(lastBidTimestamp + SIXSTY_SECONDS.toMillis());
+		logger.info("Timer updated. Current sleep time is {}", timer.getSleepTime());
 	}
 
 	@Override
