@@ -19,3 +19,10 @@ mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.Starter"
 ```bash
 mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.AuctionBidder" -Dexec.args="{bid_price}"
 ```
+
+## Send a bid (via the CLI)
+
+```bash
+temporal workflow signal --workflow-id="car" --name="bid" --input '"tom"' --input '125'
+```
+
