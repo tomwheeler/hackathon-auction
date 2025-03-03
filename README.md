@@ -20,7 +20,7 @@ mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.Starter"
 mvn compile exec:java -Dexec.mainClass="io.temporal.hackathon.CodecStarter"
 ```
 
-In the temporal UI, right-click on the codec icon (sunglasses) in the top right corner and put `http://localhost:8000` in the `Codec Server browser endpoint` field in order to view
+In the temporal UI, click on the codec icon (sunglasses) in the top right corner and put `http://localhost:8000` in the `Codec Server browser endpoint` field in order to view
 the decoded values in the UI.
 
 ## Send a bid (via a Signal)
