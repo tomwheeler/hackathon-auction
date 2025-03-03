@@ -1,12 +1,18 @@
 package io.temporal.hackathon;
 
 import io.temporal.client.WorkflowClient;
+import io.temporal.client.WorkflowClientOptions;
+import io.temporal.common.converter.CodecDataConverter;
+import io.temporal.common.converter.DefaultDataConverter;
+import io.temporal.hackathon.codec.SecurePayloadCodec;
 import io.temporal.hackathon.domain.temporal.AuctionWorkflowImpl;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
 import io.temporal.hackathon.client.ClientProvider;
 import java.io.IOException;
+
+import java.util.List;
 
 public class AuctionWorker {
 

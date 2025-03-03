@@ -1,68 +1,69 @@
 package io.temporal.hackathon.domain.temporal;
 
+import io.temporal.hackathon.domain.auction.AuctionState;
 import io.temporal.hackathon.domain.auction.AuctionStats;
-import io.temporal.workflow.CancellationScope;
-import io.temporal.workflow.ContinueAsNewOptions;
+import io.temporal.hackathon.domain.bid.Bid;
+import io.temporal.hackathon.domain.timer.Timer;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
+
 import java.time.Duration;
-import io.temporal.workflow.Promise;
+import java.util.LinkedList;
 
 public class AuctionWorkflowImpl implements AuctionWorkflow {
 
 	private final Logger logger = Workflow.getLogger(AuctionWorkflowImpl.class);
 
 	private static final Duration THIRTY_SECONDS = Duration.ofSeconds(30);
-	private CancellationScope cancellationScope;
-	private Promise<Void> timerPromise;
-	private boolean hasEnded;
+	private final Timer timer = new Timer();
 	private long currentPrice;
 	private long lastBidTimestamp;
+	private LinkedList<Bid> bids = new LinkedList<>();
+	private String auctionId;
+	private AuctionState state;
 
     @Override
     public long startAuction(String auctionId) {
-		while (!hasEnded) {
-			createAndStartTimer();
-			if (System.currentTimeMillis() - lastBidTimestamp > 30_000) {
+			this.state = AuctionState.STARTED;
+
+		while (!state.equals(AuctionState.COMPLETED)) {
+			timer.sleep(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
+			if (timer.getSleepTime() > THIRTY_SECONDS.toMillis()) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
-				hasEnded = true;
+				state = AuctionState.COMPLETED;
 			}
 		}
         return currentPrice;
     }
 
-	private void createAndStartTimer() {
-		cancellationScope = Workflow.newCancellationScope(
-				() -> timerPromise = Workflow.newTimer(THIRTY_SECONDS)
-		);
-		cancellationScope.run();
-		Workflow.await(() -> timerPromise.isCompleted() || this.hasEnded);
-	}
-
 	@Override
 	public void bid(String userId, Long amount) {
 		logger.info("Bid received");
-		lastBidTimestamp = System.currentTimeMillis();
+		lastBidTimestamp = Workflow.currentTimeMillis();
+
 
 		// use validator instead?
-		if (amount <= currentPrice || hasEnded) {
+		boolean isValid = amount > currentPrice;
+		bids.add(new Bid(userId, amount, isValid, lastBidTimestamp));
+
+		if (!isValid) {
 			logger.info("Bid rejected. Amount {} is too low", amount);
 			return;
 		}
 
 		logger.info("Bid accepted. Price is now {}", amount);
 		currentPrice = amount;
-		cancellationScope.cancel();
-		createAndStartTimer();
+		timer.updateWakeUpTime(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
+		logger.info("Timer updated. Current sleep time is {}", timer.getSleepTime());
 	}
 
 	@Override
-	public AuctionStats getStats(String auctionId) {
-		return null;
+	public AuctionStats getStats() {
+		return new AuctionStats(auctionId, state , bids);
 	}
 
 	@Override
 	public void end() {
-		hasEnded = true;
+		state = AuctionState.COMPLETED;
 	}
 }
