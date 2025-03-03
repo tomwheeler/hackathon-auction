@@ -3,14 +3,15 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import io.temporal.hackathon.client.ClientProvider;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class AuctionBidder {
 
-    public static void main(String[] args) {
-        WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
-        WorkflowClient client = WorkflowClient.newInstance(service);
+    public static void main(String[] args) throws IOException {
+        WorkflowClient client = ClientProvider.getClient();
 
         String name  = System.getenv("USER");
 

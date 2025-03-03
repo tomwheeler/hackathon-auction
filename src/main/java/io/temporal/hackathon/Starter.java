@@ -4,17 +4,18 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import io.temporal.hackathon.domain.temporal.AuctionWorkflow;
 import io.temporal.serviceclient.WorkflowServiceStubs;
+import io.temporal.hackathon.client.ClientProvider;
+import java.io.IOException;
 
 public class Starter {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String item = "car";
 
-        WorkflowServiceStubs service = WorkflowServiceStubs.newLocalServiceStubs();
-        WorkflowClient workflowClient = WorkflowClient.newInstance(service);
+        WorkflowClient client = ClientProvider.getClient();
 
         WorkflowOptions options = WorkflowOptions.newBuilder().setWorkflowId(item).setTaskQueue("auction").build();
-        AuctionWorkflow auction = workflowClient.newWorkflowStub(AuctionWorkflow.class, options);
+        AuctionWorkflow auction = client.newWorkflowStub(AuctionWorkflow.class, options);
 
         long amount = auction.startAuction(item);
 
