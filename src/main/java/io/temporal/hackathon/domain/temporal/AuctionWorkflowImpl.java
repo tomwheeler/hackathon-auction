@@ -14,13 +14,12 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
 	private final Timer timer = new Timer();
 	private boolean hasEnded;
 	private long currentPrice;
-	private long lastBidTimestamp;
 
     @Override
     public long startAuction(String auctionId) {
 		while (!hasEnded) {
-			timer.sleep(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis(), hasEnded);
-			if (Workflow.currentTimeMillis() - lastBidTimestamp > timer.getSleepTime()) {
+			timer.sleep(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
+			if (timer.getSleepTime() > THIRTY_SECONDS.toMillis()) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
 				hasEnded = true;
 			}
@@ -31,7 +30,6 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
 	@Override
 	public void bid(String userId, Long amount) {
 		logger.info("Bid received");
-		lastBidTimestamp = Workflow.currentTimeMillis() ;
 
 		// use validator instead?
 		if (amount <= currentPrice || hasEnded) {
@@ -41,7 +39,8 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
 
 		logger.info("Bid accepted. Price is now {}", amount);
 		currentPrice = amount;
-		timer.updateWakeUpTime(lastBidTimestamp + THIRTY_SECONDS.toMillis());
+		timer.updateWakeUpTime(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
+		timer.sleep(Workflow.currentTimeMillis() + THIRTY_SECONDS.toMillis());
 		logger.info("Timer updated. Current sleep time is {}", timer.getSleepTime());
 	}
 

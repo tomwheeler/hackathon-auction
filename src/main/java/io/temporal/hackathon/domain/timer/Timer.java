@@ -12,10 +12,7 @@ public class Timer {
     private long sleepTime;
     private boolean sleepTimeUpdated;
 
-    public void sleep(
-            long sleepTime,
-            boolean auctionHasEnded
-    ) {
+    public void sleep(long sleepTime) {
         logger.info("Sleep until: {}", Instant.ofEpochMilli(sleepTime));
         this.sleepTime = sleepTime;
         while (true) {
@@ -31,7 +28,7 @@ public class Timer {
 
     public void updateWakeUpTime(long updateSleepTime) {
         logger.info("Update sleep time: {}", Instant.ofEpochMilli(updateSleepTime));
-        this.sleepTime = updateSleepTime;
+        this.sleepTime = updateSleepTime - Workflow.currentTimeMillis();
         this.sleepTimeUpdated = true;
     }
 
