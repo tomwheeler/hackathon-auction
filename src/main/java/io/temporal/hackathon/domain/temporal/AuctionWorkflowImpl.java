@@ -23,7 +23,7 @@ public class AuctionWorkflowImpl implements AuctionWorkflow {
     public long startAuction(String auctionId) {
 		while (!hasEnded) {
 			createAndStartTimer();
-			if (System.currentTimeMillis() - lastBidTimestamp > 10_000) {
+			if (System.currentTimeMillis() - lastBidTimestamp > 30_000) {
 				logger.info("Ending auction, no bid received in last 30 seconds");
 				hasEnded = true;
 			}
