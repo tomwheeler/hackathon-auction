@@ -1,20 +1,21 @@
-package io.temporal.hackathon;
+package io.temporal.hackathon.domain.temporal;
 
+import io.temporal.hackathon.domain.auction.AuctionStats;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 import java.time.Duration;
 import io.temporal.workflow.Promise;
 
-public class AuctionImpl implements Auction {
+public class AuctionWorkflowImpl implements AuctionWorkflow {
 
-	private final Logger logger = Workflow.getLogger(AuctionImpl.class);
+	private final Logger logger = Workflow.getLogger(AuctionWorkflowImpl.class);
 
 	private boolean hasEnded;
-	private int currentPrice;
+	private long currentPrice;
 	private long lastBidTimestamp;
 
     @Override
-    public int startAuction(String name) {
+    public long startAuction(String auctionId) {
 		while (!hasEnded) {
 			Promise<Void> timer = Workflow.newTimer(Duration.ofSeconds(30));
 			Workflow.await(() -> timer.isCompleted() || this.hasEnded);
@@ -27,7 +28,7 @@ public class AuctionImpl implements Auction {
     }
 
 	@Override
-	public void bid(int amount) {
+	public void bid(String userId, Long amount) {
 		logger.info("Bid received");
 		lastBidTimestamp = System.currentTimeMillis();
 
@@ -39,6 +40,11 @@ public class AuctionImpl implements Auction {
 
 		logger.info("Bid accepted. Price is now {}", amount);
 		currentPrice = amount;
+	}
+
+	@Override
+	public AuctionStats getStats(String auctionId) {
+		return null;
 	}
 
 	@Override
